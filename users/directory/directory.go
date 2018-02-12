@@ -46,7 +46,7 @@ func NewUserService(opts *users.Opts) (users.UserService, error) {
 	return &userService{client: directoryClient}, nil
 }
 
-func (u *userService) List() (users.Users, error) {
+func (u *userService) List(opt users.ListOptions) (users.Users, error) {
 	return nil, errors.New("not implemented")
 }
 

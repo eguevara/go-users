@@ -43,23 +43,31 @@ func (u *userService) Disable(id int) error {
 }
 
 // List will return a full list of gitlab users.
-func (u *userService) List() (users.Users, error) {
-	opts := &gitlab.ListUsersOptions{
-		ListOptions: gitlab.ListOptions{
-			Page:    1,
-			PerPage: 1000,
-		},
-		Active: gitlab.Bool(true),
+func (u *userService) List(opts users.ListOptions) (users.Users, error) {
+	var options gitlab.ListUsersOptions
+	options, ok := opts.(gitlab.ListUsersOptions)
+	if ok != true {
+		return nil, errors.New("type assertion on opts")
 	}
 
-	resp, _, err := u.client.Users.ListUsers(opts)
-	if err != nil {
-		return nil, err
+	var allUsers []*gitlab.User
+	for {
+		req, resp, err := u.client.Users.ListUsers(&options)
+		if err != nil {
+			return nil, err
+		}
+
+		allUsers = append(allUsers, req...)
+		if resp.NextPage == 0 {
+			break
+		}
+
+		options.ListOptions.Page = resp.NextPage
 	}
 
-	list := make(users.Users, len(resp))
+	list := make(users.Users, len(allUsers))
 
-	for i, u := range resp {
+	for i, u := range allUsers {
 		list[i] = users.User{
 			Name:     u.Name,
 			UserName: u.Username,

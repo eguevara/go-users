@@ -28,13 +28,16 @@ type User struct {
 	ID int
 }
 
+// ListOptions is a wrapper interface for list options.
+type ListOptions interface{}
+
 // Users is a list of User types
 type Users []User
 
 // UserService is an abstract interface to be implemented by any User type.
 type UserService interface {
 	// List will return a list of users from the user service.
-	List() (Users, error)
+	List(ListOptions) (Users, error)
 
 	// Get will return a User type from the user service.
 	Get(string) (*User, error)
